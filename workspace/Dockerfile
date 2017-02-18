@@ -67,4 +67,4 @@ USER dev-user
 
 WORKDIR /var/www
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/bash", "-c"]
