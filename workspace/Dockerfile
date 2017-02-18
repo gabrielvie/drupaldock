@@ -28,7 +28,10 @@ RUN addgroup -g ${PGID} dev-user \
 #------------------------
 # PHP ini
 #------------------------
-ADD ./php.ini /usr/local/etc/php/php.ini
+ARG MEMORY_LIMIT=128M
+RUN touch /usr/local/etc/php/php.ini \
+ && echo "memory_limit = ${MEMORY_LIMIT}" >> /usr/local/etc/php/php.ini \
+ && echo "date.timezone = ${TIMEZONE}" >> /usr/local/etc/php/php.ini
 
 #------------------------
 # Composer
