@@ -5,8 +5,8 @@ MAINTAINER Gabriel Vieira <gabrielvie@gmail.com>
 #------------------------
 # Workspace bash
 #------------------------
-RUN apk update \
- && apk --no-cache add \
+RUN apk --update --no-cache add \
+    autoconf gcc g++ make \
     bash git tzdata openssh
 
 #------------------------
@@ -26,11 +26,23 @@ RUN addgroup -g ${PGID} dev-user \
  && adduser -u ${PUID} -D -S -G dev-user dev-user
 
 #------------------------
+# PHP ini
+#------------------------
+ADD ./php.ini /usr/local/etc/php/php.ini
+
+#------------------------
 # Composer
 #------------------------
 RUN curl -s http://getcomposer.org/installer | php \
  && echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc \
  && mv composer.phar /usr/local/bin/composer
+
+#------------------------
+# Xdebug Package
+#------------------------
+RUN yes | pecl install xdebug \
+ && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/php.ini
+ADD ./xdebug.ini /usr/local/etc/php/xdebug.ini
 
 #------------------------
 # Bash config
@@ -39,29 +51,11 @@ USER dev-user
 RUN git clone --depth=1 https://github.com/Bash-it/bash-it.git /home/dev-user/.bash_it \
  && /home/dev-user/.bash_it/install.sh
 
-    # git mysql-client postgresql-client curl \
-    # libmcrypt libmcrypt-dev libxml2-dev \
-    # libpng-dev libjpeg-turbo-dev
-
-# RUN docker-php-source extract \
-#  && pecl install xdebug \
-#  && docker-php-ext-enable xdebug \
-#  && docker-php-source delete \
-#  && docker-php-ext-install \
-#     dom exif iconv json mbstring mcrypt mysqli opcache \
-#     pdo pdo_mysql pdo_pgsql pdo_sqlite pgsql \
-#     session simplexml tidy tokenizer xml xmlreader xmlrpc xmlwriter xsl zip \
-#  && echo "xdebug.remote_enable=on\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-#  && echo "xdebug.remote_autostart=off\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-#  && echo "xdebug.remote_port=9000\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-#  && echo "xdebug.remote_handler=dbgp\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-#  && echo "xdebug.remote_connect_back=0\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
 #------------------------
 # Composer configuration
 #------------------------
 RUN mkdir /home/dev-user/.composer
-COPY ./composer.json /home/dev-user/.composer/composer.json
+ADD ./composer.json /home/dev-user/.composer/composer.json
 RUN composer global install \
  && echo 'export PATH="$PATH:/var/www/vendor/bin:$HOME/.composer/vendor/bin"' >> ~/.bashrc
 
