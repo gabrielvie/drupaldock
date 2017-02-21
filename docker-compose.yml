@@ -1,4 +1,5 @@
 version: "2"
+
 services:
 
   applications:
@@ -6,19 +7,6 @@ services:
     image: tianon/true
     volumes:
       - "../:/var/www"
-
-  php-fpm:
-    build:
-      context: ./php-fpm
-    container_name: drupal_php-fpm
-    volumes_from:
-      - applications
-    expose:
-      - "9000"
-    extra_hosts:
-      - "dockerhost:10.0.75.1"
-    links:
-      - workspace
 
   workspace:
     build:
@@ -36,3 +24,44 @@ services:
     tty: true
     volumes_from:
       - applications
+
+  php-fpm:
+    build:
+      context: ./php-fpm
+    container_name: drupal_php-fpm
+    expose:
+      - "9000"
+    extra_hosts:
+      - "dockerhost:10.0.75.1"
+    links:
+      - workspace
+    volumes_from:
+      - applications
+
+  nginx:
+    build:
+      args:
+        - PHP_UPSTREAM=php-fpm
+      context: ./nginx
+    container_name: drupal_nginx
+    links:
+      - php-fpm
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./logs/nginx/:/var/log/nginx"
+      - "./nginx/sites/:/etc/nginx/sites-available"
+    volumes_from:
+      - applications
+
+  postgres:
+    build: ./postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: drupal
+      POSTGRES_USER: drupal
+      POSTGRES_PASSWORD: secret
