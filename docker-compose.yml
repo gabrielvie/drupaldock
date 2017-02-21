@@ -1,24 +1,38 @@
-version: '2'
-
+version: "2"
 services:
-    applications:
-        container_name: symfony_applications
-        image: tianon/true
-        volumes: 
-            - ../:/var/www
 
-    workspace:
-        container_name: symfony_workspace
-        build:
-            context: ./workspace
-            args:
-                - PUID=1000
-                - PGID=1000
-                - TIMEZONE=America/Sao_Paulo
-        volumes_from:
-            - applications
-        extra_hosts:
-            - "dockerhost:10.0.75.1"
-        ports:
-            - "2222:22"
-        tty: true
+  applications:
+    container_name: drupal_applications
+    image: tianon/true
+    volumes:
+      - "../:/var/www"
+
+  php-fpm:
+    build:
+      context: ./php-fpm
+    container_name: drupal_php-fpm
+    volumes_from:
+      - applications
+    expose:
+      - "9000"
+    extra_hosts:
+      - "dockerhost:10.0.75.1"
+    links:
+      - workspace
+
+  workspace:
+    build:
+      args:
+        - PUID=1000
+        - PGID=1000
+        - TIMEZONE=America/Sao_Paulo
+        - MEMORY_LIMIT=128M
+      context: ./workspace
+    container_name: drupal_workspace
+    extra_hosts:
+      - "dockerhost:10.0.75.1"
+    ports:
+      - "2222:22"
+    tty: true
+    volumes_from:
+      - applications
