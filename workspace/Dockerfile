@@ -3,11 +3,11 @@ FROM php:7.0-alpine
 MAINTAINER Gabriel Vieira <gabrielvie@gmail.com>
 
 #------------------------
-# Workspace bash
+# Packages
 #------------------------
 RUN apk --update --no-cache add \
     autoconf gcc g++ make \
-    bash git tzdata openssh
+    bash git tzdata
 
 #------------------------
 # Set Container TimeZone
@@ -44,8 +44,8 @@ RUN curl -s http://getcomposer.org/installer | php \
 # Xdebug Package
 #------------------------
 RUN yes | pecl install xdebug \
- && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/php.ini
-ADD ./xdebug.ini /usr/local/etc/php/xdebug.ini
+ && docker-php-ext-enable xdebug
+ADD ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 #------------------------
 # Bash config
@@ -70,4 +70,4 @@ USER dev-user
 
 WORKDIR /var/www
 
-ENTRYPOINT ["/bin/bash", "-c"]
+ENTRYPOINT ["/bin/bash"]
