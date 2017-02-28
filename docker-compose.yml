@@ -55,12 +55,24 @@ services:
     volumes_from:
       - applications
 
-  postgres:
-    build: ./postgres
+  mysql:
+    container_name: drupal_mysql
+    image: mysql:5.5
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - "./data/mysql:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: secretroot
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: secret
+
+  postgres:
+    container_name: drupal_postgres
+    image: postgres:9.4-alpine
+    volumes:
+      - "./data/postgres:/var/lib/postgresql/data"
     ports:
-      - "5432:5432"
+      - "2342:5432"
     environment:
       POSTGRES_DB: drupal
       POSTGRES_USER: drupal
