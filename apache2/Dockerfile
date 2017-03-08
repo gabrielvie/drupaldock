@@ -1,7 +1,5 @@
 FROM php:7.0-apache
 
-MAINTAINER Gabriel Vieira <gabrielvie@gmail.com>
-
 RUN apt-get update \
  && apt-get install -y \
     autoconf gcc g++ make \

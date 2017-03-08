@@ -1,7 +1,5 @@
 FROM nginx:1.11-alpine
 
-MAINTAINER Gabriel Vieira <gabrielvie@gmail.com>
-
 ADD nginx.conf /etc/nginx/
 
 ARG PHP_UPSTREAM=php-fpm
