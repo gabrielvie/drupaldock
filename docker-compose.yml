@@ -50,15 +50,42 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "./logs/nginx/:/var/log/nginx"
-      - "./nginx/sites/:/etc/nginx/sites-available"
+      - ./logs/nginx:/var/log/nginx
+      - ./nginx/sites:/etc/nginx/sites-available
     volumes_from:
       - applications
 
-  postgres:
-    build: ./postgres
+  apache2:
+    build:
+      context: ./apache2
+    container_name: drupal_apache
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - ./apache2/sites:/etc/apache2/sites-enabled
+      - ./logs/apache2:/var/log/apache2
+    volumes_from:
+      - applications
+
+  mysql:
+    container_name: drupal_mysql
+    image: mysql:5.5
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secretroot
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: secret
+
+  postgres:
+    container_name: drupal_postgres
+    image: postgres:9.4-alpine
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
