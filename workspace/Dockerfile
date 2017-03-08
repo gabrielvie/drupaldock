@@ -7,7 +7,9 @@ MAINTAINER Gabriel Vieira <gabrielvie@gmail.com>
 #------------------------
 RUN apk --update --no-cache add \
     autoconf gcc g++ make \
-    bash git tzdata
+    postgresql-dev libxml2-dev \
+    bash git tzdata \
+    mysql-client
 
 #------------------------
 # Set Container TimeZone
@@ -41,7 +43,14 @@ RUN curl -s http://getcomposer.org/installer | php \
  && mv composer.phar /usr/local/bin/composer
 
 #------------------------
-# Xdebug Package
+# PHP Extensions
+#------------------------
+RUN docker-php-ext-install \
+    pdo pdo_mysql pdo_pgsql \
+    ctype dom
+
+#------------------------
+# Xdebug Extensions
 #------------------------
 RUN yes | pecl install xdebug \
  && docker-php-ext-enable xdebug
@@ -61,7 +70,6 @@ RUN mkdir /home/dev-user/.composer
 ADD ./composer.json /home/dev-user/.composer/composer.json
 RUN composer global install \
  && echo 'export PATH="$PATH:/var/www/vendor/bin:$HOME/.composer/vendor/bin"' >> ~/.bashrc
-
 
 USER root
 RUN rm -rf /tmp/*
